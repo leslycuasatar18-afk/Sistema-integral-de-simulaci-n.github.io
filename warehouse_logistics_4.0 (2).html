@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Logística 4.0 - Recepción de Pedidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .order-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: background 0.3s;
+        }
+
+        .order-item:hover {
+            background: #e9ecef;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-procesando {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .ai-response {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .ai-response h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏭 Sistema Integral de Logística 4.0</h1>
+            <p class="subtitle">Tecnología Inteligente para Gestión de Recepción de Pedidos</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3>Pedidos Hoy</h3>
+                <div class="stat-value" id="totalOrders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>En Proceso</h3>
+                <div class="stat-value" id="processingOrders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Completados</h3>
+                <div class="stat-value" id="completedOrders">0</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>📦 Registro de Pedido</h2>
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label for="orderId">ID Pedido:</label>
+                        <input type="text" id="orderId" placeholder="Ej: PED-2025-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier">Proveedor:</label>
+                        <input type="text" id="supplier" placeholder="Nombre del proveedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product">Producto:</label>
+                        <input type="text" id="product" placeholder="Descripción del producto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Cantidad:</label>
+                        <input type="number" id="quantity" placeholder="0" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Prioridad:</label>
+                        <select id="priority" required>
+                            <option value="baja">Baja</option>
+                            <option value="media" selected>Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <button type="submit">Registrar Pedido</button>
+                    <button type="button" id="syncSheets" class="btn-small">📊 Sincronizar con Google Sheets</button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2>🤖 Asistente IA Logístico</h2>
+                <div class="form-group">
+                    <label for="aiQuery">Consulta al Asistente:</label>
+                    <textarea id="aiQuery" rows="3" placeholder="Ej: ¿Cómo optimizar el espacio de almacenamiento para pedidos urgentes?"></textarea>
+                </div>
+                <button id="askAI">Consultar IA</button>
+                <div id="aiResponseContainer"></div>
+            </div>
+
+            <div class="panel full-width">
+                <h2>📋 Pedidos en Recepción</h2>
+                <div class="order-list" id="orderList">
+                    <p style="text-align: center; color: #999; padding: 40px;">No hay pedidos registrados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado de la aplicación
+        const appState = {
+            orders: [],
+            stats: {
+                total: 0,
+                processing: 0,
+                completed: 0
+            }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+            updateDashboard();
+        });
+
+        // Registro de pedido
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const order = {
+                id: document.getElementById('orderId').value,
+                supplier: document.getElementById('supplier').value,
+                product: document.getElementById('product').value,
+                quantity: parseInt(document.getElementById('quantity').value),
+                priority: document.getElementById('priority').value,
+                status: 'pendiente',
+                timestamp: new Date().toISOString(),
+                location: 'Zona de Recepción'
+            };
+
+            appState.orders.unshift(order);
+            saveOrders();
+            updateDashboard();
+            renderOrders();
+            
+            showAlert('Pedido registrado exitosamente', 'success');
+            e.target.reset();
+        });
+
+        // Consulta a IA
+        document.getElementById('askAI').addEventListener('click', async () => {
+            const query = document.getElementById('aiQuery').value;
+            if (!query.trim()) {
+                showAlert('Por favor, ingrese una consulta', 'error');
+                return;
+            }
+
+            const container = document.getElementById('aiResponseContainer');
+            container.innerHTML = '<div class="ai-response"><div class="loading"></div> Consultando IA...</div>';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `Eres un experto en logística 4.0 y gestión de almacenes. Contexto: Sistema de recepción de pedidos con ${appState.orders.length} pedidos activos. Consulta: ${query}`
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const aiText = data.content.map(item => item.text || '').join('\n');
+
+                container.innerHTML = `
+                    <div class="ai-response">
+                        <h4>🤖 Respuesta del Asistente IA:</h4>
+                        <p>${aiText}</p>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="ai-response">
+                        <h4>⚠️ Respuesta Simulada:</h4>
+                        <p>Para optimizar la recepción de pedidos urgentes, recomiendo:</p>
+                        <ul>
+                            <li>Asignar zona prioritaria cerca del área de procesamiento</li>
+                            <li>Implementar identificación visual (etiquetas rojas)</li>
+                            <li>Establecer protocolo de verificación rápida</li>
+                            <li>Coordinar con el equipo de almacenamiento anticipadamente</li>
+                        </ul>
+                        <p><em>Nota: Conecte una API key válida para respuestas en tiempo real.</em></p>
+                    </div>
+                `;
+            }
+        });
+
+        // Sincronización con Google Sheets (simulado)
+        document.getElementById('syncSheets').addEventListener('click', async () => {
+            showAlert('Sincronizando con Google Sheets...', 'success');
+            
+            // Simulación de sincronización
+            setTimeout(() => {
+                showAlert('✅ Datos sincronizados exitosamente con Google Sheets', 'success');
+                console.log('Datos para Google Sheets:', appState.orders);
+            }, 1500);
+
+            // En producción, usar Google Sheets API:
+            /*
+            const SHEET_URL = 'TU_GOOGLE_SHEETS_API_URL';
+            const response = await fetch(SHEET_URL, {
+                method: 'POST',
+                body: JSON.stringify(appState.orders)
+            });
+            */
+        });
+
+        // Funciones de gestión de pedidos
+        function changeOrderStatus(orderId, newStatus) {
+            const order = appState.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveOrders();
+                updateDashboard();
+                renderOrders();
+                showAlert(`Estado actualizado: ${newStatus}`, 'success');
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('¿Eliminar este pedido?')) {
+                appState.orders = appState.orders.filter(o => o.id !== orderId);
+                saveOrders();
+                updateDashboard();
+                renderOrders();
+                showAlert('Pedido eliminado', 'success');
+            }
+        }
+
+        // Renderizado de pedidos
+        function renderOrders() {
+            const container = document.getElementById('orderList');
+            
+            if (appState.orders.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No hay pedidos registrados</p>';
+                return;
+            }
+
+            container.innerHTML = appState.orders.map(order => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-id">${order.id}</span>
+                        <span class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
+                    </div>
+                    <p><strong>Proveedor:</strong> ${order.supplier}</p>
+                    <p><strong>Producto:</strong> ${order.product}</p>
+                    <p><strong>Cantidad:</strong> ${order.quantity} unidades</p>
+                    <p><strong>Prioridad:</strong> ${order.priority}</p>
+                    <p><strong>Ubicación:</strong> ${order.location}</p>
+                    <p><strong>Hora:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                    <div class="action-buttons">
+                        <button class="btn-small" onclick="changeOrderStatus('${order.id}', 'procesando')">⚙️ Procesar</button>
+                        <button class="btn-small" onclick="changeOrderStatus('${order.id}', 'completado')">✅ Completar</button>
+                        <button class="btn-small" onclick="deleteOrder('${order.id}')">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Actualización de dashboard
+        function updateDashboard() {
+            appState.stats.total = appState.orders.length;
+            appState.stats.processing = appState.orders.filter(o => o.status === 'procesando').length;
+            appState.stats.completed = appState.orders.filter(o => o.status === 'completado').length;
+
+            document.getElementById('totalOrders').textContent = appState.stats.total;
+            document.getElementById('processingOrders').textContent = appState.stats.processing;
+            document.getElementById('completedOrders').textContent = appState.stats.completed;
+        }
+
+        // Persistencia de datos
+        function saveOrders() {
+            localStorage.setItem('logistics_orders', JSON.stringify(appState.orders));
+        }
+
+        function loadOrders() {
+            const saved = localStorage.getItem('logistics_orders');
+            if (saved) {
+                appState.orders = JSON.parse(saved);
+                renderOrders();
+            }
+        }
+
+        // Alertas
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '1000';
+            alert.style.minWidth = '300px';
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
