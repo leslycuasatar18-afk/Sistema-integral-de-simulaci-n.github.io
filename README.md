@@ -259,16 +259,16 @@ interface Order {
 ```
 
 **Validaciones implementadas**:
-- ✅ ID no vacío
-- ✅ Supplier no vacío
-- ✅ Product no vacío
-- ✅ Quantity mayor a 0
-- ✅ Priority debe ser valor válido
-- ✅ Timestamp generado automáticamente
+- ID no vacío
+- Supplier no vacío
+- Product no vacío
+- Quantity mayor a 0
+- Priority debe ser valor válido
+- Timestamp generado automáticamente
 
 ---
 
-## 🤖 3. IMPLEMENTACIÓN DE INTELIGENCIA ARTIFICIAL
+## 3. IMPLEMENTACIÓN DE INTELIGENCIA ARTIFICIAL
 
 ### 3.1 Integración con Claude API (Anthropic)
 
