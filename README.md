@@ -381,6 +381,6 @@ Este aplicativo web cumple con todos los requisitos de un sistema logístico mod
 
 1.  **Funcionamiento completo**: Sistema totalmente operativo con todas las funciones integradas
 2.  **Base de datos**: Doble capa de persistencia (local + cloud)
-3. ✅ **Inteligencia Artificial**: Asistente conversacional con contexto del sistema
+3.  **Inteligencia Artificial**: Asistente conversacional con contexto del sistema
 
-**Estado del proyecto**: Listo para producción y evaluación académica.
+
